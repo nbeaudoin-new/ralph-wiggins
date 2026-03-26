@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinkedIn</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%230a66c2'/><path fill='%23fff' d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452z'/></svg>" />
+  <style>
+    :root {
+      --linkedin-blue: #0a66c2;
+      --bg-page: #f3f2ef;
+      --text-primary: rgba(0,0,0,0.9);
+      --text-secondary: rgba(0,0,0,0.6);
+      --text-muted: rgba(0,0,0,0.55);
+      --border: rgba(0,0,0,0.12);
+      --gold: #915907;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-page);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: rgba(0,0,0,0.9);
+    }
+
+    /* ── TOP NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center;
+      padding: 0 24px; height: 52px; gap: 4px;
+    }
+    .nav-logo {
+      width: 34px; height: 34px; background: var(--linkedin-blue); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 8px; flex-shrink: 0;
+    }
+    .nav-logo svg { width: 22px; height: 22px; fill: #fff; }
+    .nav-search {
+      display: flex; align-items: center;
+      background: #eef3f8; border-radius: 4px;
+      padding: 6px 12px; gap: 8px; flex: 0 0 280px;
+    }
+    .nav-search input {
+      border: none; background: transparent; font-size: 14px;
+      color: rgba(0,0,0,0.9); outline: none; width: 100%;
+    }
+    .nav-search input::placeholder { color: rgba(0,0,0,0.6); }
+    .nav-search svg { width: 16px; height: 16px; fill: rgba(0,0,0,0.6); flex-shrink: 0; }
+    .nav-spacer { flex: 1; }
+    .nav-items { display: flex; align-items: center; gap: 4px; }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 8px; cursor: pointer;
+      text-decoration: none; color: rgba(0,0,0,0.55);
+      font-size: 12px; gap: 2px; min-width: 65px;
+      border-bottom: 2px solid transparent;
+      position: relative;
+    }
+    .nav-item:hover { color: rgba(0,0,0,0.9); }
+    .nav-item.active { color: rgba(0,0,0,0.9); border-bottom: 2px solid rgba(0,0,0,0.9); }
+    .nav-item svg { width: 24px; height: 24px; }
+    .nav-divider { width: 1px; height: 32px; background: rgba(0,0,0,0.15); margin: 0 4px; }
+    /* Notification badge */
+    .nav-badge {
+      position: absolute; top: 0; left: 50%; transform: translateX(2px);
+      background: #cc1016; color: #fff;
+      font-size: 10px; font-weight: 700; line-height: 1;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      max-width: 1128px; margin: 0 auto;
+      padding: 24px 16px;
+      display: grid;
+      grid-template-columns: 225px 1fr 300px;
+      gap: 24px; align-items: start;
+    }
+
+    /* ── LEFT SIDEBAR ── */
+    .sidebar-left { display: flex; flex-direction: column; gap: 8px; }
+
+    .profile-card {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; overflow: hidden;
+    }
+    .profile-card-banner {
+      height: 56px;
+      background-image: url("images/zoom-in-pic.png");
+      background-size: 160% auto;
+      background-position: 40% top;
+      position: relative; overflow: hidden;
+    }
+    .profile-card-body { padding: 0 12px 12px; position: relative; }
+    .profile-avatar-wrap {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 2px solid #fff; overflow: hidden;
+      margin-top: -30px; background: #c5a880;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    .profile-name-row {
+      display: flex; align-items: center; gap: 5px; margin-top: 8px;
+    }
+    .profile-name {
+      font-size: 15px; font-weight: 600; color: rgba(0,0,0,0.9);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    /* shield / verification badge */
+    .shield-badge {
+      width: 16px; height: 16px; flex-shrink: 0;
+      color: rgba(0,0,0,0.45);
+    }
+    .profile-headline {
+      font-size: 12px; color: rgba(0,0,0,0.7);
+      margin-top: 3px; line-height: 1.4;
+    }
+    .profile-location {
+      font-size: 12px; color: rgba(0,0,0,0.55);
+      margin-top: 2px;
+    }
+    .profile-company {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 6px; font-size: 12px; color: rgba(0,0,0,0.7);
+      font-weight: 500;
+    }
+    .wavicle-logo {
+      width: 18px; height: 18px; border-radius: 3px;
+      background: var(--linkedin-blue);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 800; color: #fff;
+      letter-spacing: -1px;
+    }
+    .profile-divider { border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 10px 0; }
+
+    /* Stats */
+    .profile-stat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 0; cursor: pointer;
+    }
+    .stat-label { font-size: 12px; color: rgba(0,0,0,0.6); }
+    .stat-count {
+      font-size: 14px; font-weight: 600; color: var(--linkedin-blue);
+      text-decoration: none;
+    }
+    .profile-stat:hover .stat-count { text-decoration: underline; }
+
+    /* Premium upsell — separate card */
+    .premium-card {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .premium-upsell-text {
+      font-size: 12px; color: rgba(0,0,0,0.7); line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .premium-upsell-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.8);
+      cursor: pointer;
+    }
+    .premium-upsell-btn:hover { text-decoration: underline; }
+    .gold-square {
+      width: 16px; height: 16px; border-radius: 3px;
+      background: linear-gradient(135deg, #f0b429 0%, #d4860a 100%);
+      flex-shrink: 0;
+    }
+
+    /* Sidebar nav */
+    .sidebar-nav {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; padding: 8px 0;
+    }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; cursor: pointer; font-size: 14px;
+      color: rgba(0,0,0,0.7); text-decoration: none;
+    }
+    .sidebar-nav-item:hover { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.9); }
+    .sidebar-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; fill: currentColor; }
+
+    /* ── FEED ── */
+    .feed { display: flex; flex-direction: column; gap: 8px; }
+
+    /* Composer */
+    .composer {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; padding: 12px;
+    }
+    .composer-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .composer-avatar {
+      width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .composer-input {
+      flex: 1; border: 1px solid rgba(0,0,0,0.3); border-radius: 24px;
+      padding: 10px 16px; font-size: 14px; color: rgba(0,0,0,0.6);
+      cursor: pointer; background: transparent; font-weight: 600;
+    }
+    .composer-input:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.7); }
+    .composer-actions { display: flex; justify-content: space-around; }
+    .composer-action {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px; border-radius: 4px; cursor: pointer;
+      font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.6);
+    }
+    .composer-action:hover { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.9); }
+    .composer-action svg { width: 20px; height: 20px; }
+
+    /* Post card */
+    .post-card {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; overflow: hidden;
+    }
+    .post-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 12px 16px 0;
+    }
+    .post-author { display: flex; gap: 10px; }
+    .post-avatar {
+      width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .post-avatar-square {
+      width: 48px; height: 48px; border-radius: 4px; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .post-avatar img, .post-avatar-square img { width: 100%; height: 100%; object-fit: cover; }
+    .post-author-info {}
+    .post-author-name {
+      font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9);
+      cursor: pointer; line-height: 1.3;
+    }
+    .post-author-name:hover { color: var(--linkedin-blue); text-decoration: underline; }
+    .post-author-sub {
+      font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.3;
+    }
+    .post-meta {
+      font-size: 12px; color: rgba(0,0,0,0.6);
+      display: flex; align-items: center; gap: 4px; margin-top: 1px;
+    }
+    .post-meta-dot { font-size: 8px; }
+    .post-more {
+      display: flex; align-items: center; gap: 2px; cursor: pointer;
+      color: rgba(0,0,0,0.6); padding: 4px; flex-shrink: 0;
+    }
+    .post-more:hover { color: rgba(0,0,0,0.9); }
+    .post-more svg { width: 20px; height: 20px; }
+    .post-follow-btn {
+      display: flex; align-items: center; gap: 4px;
+      color: var(--linkedin-blue); font-weight: 600; font-size: 14px;
+      cursor: pointer; padding: 4px; white-space: nowrap;
+    }
+    .post-follow-btn svg { width: 14px; height: 14px; fill: currentColor; }
+    .post-follow-btn:hover { text-decoration: underline; }
+
+    .post-body { padding: 8px 16px 0; }
+    .post-text {
+      font-size: 14px; line-height: 1.5; color: rgba(0,0,0,0.9);
+      white-space: pre-wrap;
+    }
+    .post-text .hashtag { color: var(--linkedin-blue); cursor: pointer; }
+    .post-text .hashtag:hover { text-decoration: underline; }
+    .post-text .post-link { color: var(--linkedin-blue); cursor: pointer; text-decoration: none; }
+    .post-text .post-link:hover { text-decoration: underline; }
+
+    /* Edge-to-edge post image — no side padding */
+    .post-image { margin-top: 8px; cursor: pointer; }
+    .post-image img { width: 100%; display: block; }
+
+    .post-reactions {
+      padding: 6px 16px; display: flex; justify-content: space-between;
+      align-items: center; border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .reaction-summary {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; color: rgba(0,0,0,0.6); cursor: pointer;
+    }
+    .reaction-summary:hover { color: rgba(0,0,0,0.9); }
+    .reaction-summary:hover span { text-decoration: underline; }
+    .reaction-icons { display: flex; }
+    .reaction-icon {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1.5px solid #fff; margin-left: -4px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .reaction-icon:first-child { margin-left: 0; }
+    .ri-like { background: var(--linkedin-blue); }
+    .ri-celebrate { background: #44712e; }
+    .ri-insightful { background: var(--gold); }
+    .comment-count {
+      font-size: 12px; color: rgba(0,0,0,0.6); cursor: pointer;
+    }
+    .comment-count:hover { color: var(--linkedin-blue); text-decoration: underline; }
+
+    .post-actions {
+      display: flex; justify-content: space-around; padding: 2px 8px;
+    }
+    .post-action-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 8px; border-radius: 4px; cursor: pointer;
+      font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.6); flex: 1;
+    }
+    .post-action-btn:hover { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.9); }
+    .post-action-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* ── RIGHT SIDEBAR ── */
+    .sidebar-right { display: flex; flex-direction: column; gap: 8px; }
+    .widget {
+      background: #fff; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px; padding: 12px 16px;
+    }
+    .widget-title {
+      font-size: 16px; font-weight: 600; color: rgba(0,0,0,0.9);
+      margin-bottom: 8px;
+    }
+    .news-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; cursor: pointer;
+    }
+    .news-item:hover .news-headline { text-decoration: underline; }
+    .news-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(0,0,0,0.7); margin-top: 6px; flex-shrink: 0;
+    }
+    .news-headline { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9); line-height: 1.3; }
+    .news-meta { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+    .show-more {
+      color: rgba(0,0,0,0.6); font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 6px;
+      display: flex; align-items: center; gap: 2px;
+    }
+    .show-more:hover { color: rgba(0,0,0,0.9); }
+    .show-more svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .people-item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 0;
+    }
+    .people-avatar {
+      width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .people-info { flex: 1; min-width: 0; }
+    .people-name {
+      font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .people-headline {
+      font-size: 12px; color: rgba(0,0,0,0.6);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .connect-btn {
+      border: 1px solid rgba(0,0,0,0.5); border-radius: 16px;
+      padding: 5px 14px; font-size: 14px; font-weight: 600;
+      color: rgba(0,0,0,0.6); cursor: pointer; white-space: nowrap;
+    }
+    .connect-btn:hover { background: rgba(112,181,249,0.15); border-color: var(--linkedin-blue); color: var(--linkedin-blue); }
+
+    .footer-links {
+      padding: 4px 0;
+      display: flex; flex-wrap: wrap; gap: 5px;
+      font-size: 11px; color: rgba(0,0,0,0.4);
+    }
+    .footer-links a { color: rgba(0,0,0,0.4); text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; color: var(--linkedin-blue); }
+
+    /* Avatar placeholder colors */
+    .av-nb   { background: #1a6b3c; }
+    .av-blue { background: #1d4ed8; }
+    .av-teal { background: #0d9488; }
+    .av-green{ background: #15803d; }
+    .av-orange{ background: #c2410c; }
+    .av-pink { background: #be185d; }
+    .av-slate{ background: #475569; }
+    .av-init {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 18px; letter-spacing: 0.5px;
+    }
+
+    /* VibeCoderz.ai tacky logo */
+    .mechanize-logo {
+      width: 48px; height: 48px; border-radius: 4px;
+      background: linear-gradient(135deg, #ff00cc, #ff6600, #ffff00, #00ff99, #00ccff, #cc00ff);
+      background-size: 300% 300%;
+      animation: tacky-gradient 2s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px #ff00cc, 0 0 16px #00ccff;
+      font-size: 18px; font-weight: 900; color: #fff;
+      text-shadow: 1px 1px 0 #000, -1px -1px 0 #000;
+      letter-spacing: -1px; font-family: "Comic Sans MS", cursive;
+    }
+    @keyframes tacky-gradient {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .degree-badge {
+      display: inline-block; font-size: 10px;
+      color: var(--linkedin-blue); border: 1px solid var(--linkedin-blue); border-radius: 2px;
+      padding: 0 3px; margin-left: 4px; vertical-align: middle;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
+<nav class="nav">
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+  </div>
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-4.822-4.822A8 8 0 1 0 3 11a8 8 0 0 0 12.93 6.297l4.484 4.484a1 1 0 0 0 1.414-1.414l-.121-.074zM5 11a6 6 0 1 1 12 0A6 6 0 0 1 5 11z"/></svg>
+    <input type="text" placeholder="Search" />
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-items">
+    <a class="nav-item active" href="#">
+      <!-- Home: filled house, LinkedIn style -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </a>
+    <a class="nav-item" href="#">
+      <!-- My Network: two people silhouettes -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      My Network
+    </a>
+    <a class="nav-item" href="#">
+      <!-- Jobs: briefcase -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+      Jobs
+    </a>
+    <a class="nav-item" href="#">
+      <!-- Messaging: chat bubble with dots -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 11H7v-2h10v2zm0-3H7V8h10v2z"/></svg>
+      <span class="nav-badge">1</span>
+      Messaging
+    </a>
+    <a class="nav-item" href="#">
+      <!-- Notifications: bell -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <span class="nav-badge">4</span>
+      Notifications
+    </a>
+    <a class="nav-item" href="#">
+      <!-- Me: person with chevron -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      Me ▾
+    </a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h4v4H3zm7 0h4v4h-4zm7 0h4v4h-4zM3 10h4v4H3zm7 0h4v4h-4zm7 0h4v4h-4zM3 17h4v4H3zm7 0h4v4h-4zm7 0h4v4h-4z"/></svg>
+      For Business
+    </a>
+    <a href="#" style="margin-left:8px;padding:6px 14px;border:1px solid var(--gold);border-radius:16px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+      <span style="width:14px;height:14px;background:linear-gradient(135deg,#f0b429,#d4860a);border-radius:2px;display:inline-block;flex-shrink:0;"></span>
+      Try Premium
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ LAYOUT ═══════════════════════ -->
+<div class="layout">
+
+  <!-- ════════ LEFT SIDEBAR ════════ -->
+  <aside class="sidebar-left">
+
+    <!-- Profile card -->
+    <div class="profile-card">
+      <div class="profile-card-banner"></div>
+      <div class="profile-card-body">
+        <div class="profile-avatar-wrap">
+          <img src="images/NICHOLAS+BEAUDOIN0449.webp" alt="Nicholas Beaudoin" />
+        </div>
+
+        <div class="profile-name-row">
+          <span class="profile-name">Nicholas Beaudoin</span>
+          <!-- Shield / verification badge -->
+          <svg class="shield-badge" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+          </svg>
+        </div>
+
+        <div class="profile-headline">Director, AI @ Wavicle | Director of AI Programs @ Caltech CTME</div>
+        <div class="profile-location">San Diego, California</div>
+
+        <hr class="profile-divider" />
+
+        <div class="profile-stat">
+          <span class="stat-label">Profile viewers</span>
+          <span class="stat-count">864</span>
+        </div>
+        <div class="profile-stat" style="margin-top:4px;">
+          <span class="stat-label">Post impressions</span>
+          <span class="stat-count">6,377</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium upsell — separate card -->
+    <div class="premium-card">
+      <div class="premium-upsell-text">Unlock 11x more profile visits on average</div>
+      <div class="premium-upsell-btn">
+        <div class="gold-square"></div>
+        Retry Premium for $0
+      </div>
+    </div>
+
+    <!-- Sidebar nav -->
+    <div class="sidebar-nav">
+      <a class="sidebar-nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v1H3v2h2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V8h2V6h-2V5c0-1.1-.9-2-2-2zm0 14H7V8h10v9zm-7-7h4v2h-4z"/></svg>
+        Saved items
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        Groups
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        Newsletters
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        Events
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ════════ FEED ════════ -->
+  <main class="feed">
+
+    <!-- Composer -->
+    <div class="composer">
+      <div class="composer-top">
+        <div class="composer-avatar" style="background:#c5a880;">
+          <img src="images/NICHOLAS+BEAUDOIN0449.webp" alt="Nicholas Beaudoin" style="width:100%;height:100%;object-fit:cover;" />
+        </div>
+        <div class="composer-input">Start a post, try a video or an idea</div>
+      </div>
+      <div class="composer-actions">
+        <div class="composer-action">
+          <svg viewBox="0 0 24 24" fill="#70b5f9"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 3l-5.5 7.5-3-3.86L6 17h12V6z"/></svg>
+          Media
+        </div>
+        <div class="composer-action">
+          <svg viewBox="0 0 24 24" fill="#c37d16"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+          Event
+        </div>
+        <div class="composer-action">
+          <svg viewBox="0 0 24 24" fill="#5f9ea0"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6z"/></svg>
+          Write article
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ POST 1 — MECHANIZE PROMOTED (the meme) ═══════════ -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-author">
+          <div class="mechanize-logo">🤙</div>
+          <div class="post-author-info">
+            <div class="post-author-name">VibeCoderz.ai</div>
+            <div class="post-author-sub">4,068 followers</div>
+            <div class="post-meta">Promoted</div>
+          </div>
+        </div>
+        <!-- Promoted posts: only the ··· menu, no Follow button -->
+        <div class="post-more">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        </div>
+      </div>
+
+      <div class="post-body">
+        <div class="post-text">Humbled. 🙏 Vibe-coded a full Salesforce clone in an afternoon. To every dev who told me to "learn the fundamentals" — I hope you're okay. This one's for you. 💫 <span class="hashtag">#VibeCode</span> <span class="hashtag">#AI</span> <span class="hashtag">#Founder</span></div>
+      </div>
+
+      <!-- Edge-to-edge image — no side padding -->
+      <div class="post-image">
+        <img src="images/Wiggins.png" alt="Most engineers lose to AI on our take-home. We're hiring the ones who don't. Junior SWE · $300k · SF" />
+      </div>
+
+      <div class="post-reactions">
+        <div class="reaction-summary">
+          <div class="reaction-icons">
+            <div class="reaction-icon ri-like">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+            </div>
+            <div class="reaction-icon ri-celebrate">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
+            </div>
+            <div class="reaction-icon ri-insightful">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+            </div>
+          </div>
+          <span>3,412 others</span>
+        </div>
+        <div class="comment-count">214 comments</div>
+      </div>
+
+      <div class="post-actions">
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+          Like
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+          Comment
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M3 12l4-4v3h8V7.5l4 4-4 4V13H7v3z"/></svg>
+          Repost
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+          Send
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ POST 2 ═══════════ -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-author">
+          <div class="post-avatar av-blue"><div class="av-init">JC</div></div>
+          <div class="post-author-info">
+            <div class="post-author-name">Jordan Chen <span class="degree-badge">1st</span></div>
+            <div class="post-author-sub">CTO @ Veridian Labs | Building the Future of Autonomous Systems</div>
+            <div class="post-meta">
+              <span>2h</span>
+              <span class="post-meta-dot">•</span>
+              <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="post-follow-btn">
+            <svg viewBox="0 0 24 24"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6v-2z"/></svg>
+            Follow
+          </div>
+          <div class="post-more">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="post-body">
+        <div class="post-text">Hot take: the best engineers I know treat AI as a multiplier, not a replacement.
+
+We've been using AI-assisted code review for 6 months. Senior devs ship 3x faster. Junior devs who leaned in are doing the same. The ones who didn't? Still at 2022 velocity.
+
+<span class="hashtag">#Engineering</span> <span class="hashtag">#AI</span> <span class="hashtag">#FutureOfWork</span></div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-summary">
+          <div class="reaction-icons">
+            <div class="reaction-icon ri-like">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+            </div>
+            <div class="reaction-icon ri-celebrate">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
+            </div>
+          </div>
+          <span>Priya Nakamura and 4,218 others</span>
+        </div>
+        <div class="comment-count">847 comments · 312 reposts</div>
+      </div>
+      <div class="post-actions">
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+          Like
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+          Comment
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M3 12l4-4v3h8V7.5l4 4-4 4V13H7v3z"/></svg>
+          Repost
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+          Send
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ POST 3 ═══════════ -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-author">
+          <div class="post-avatar av-teal"><div class="av-init">PS</div></div>
+          <div class="post-author-info">
+            <div class="post-author-name">Priya Sharma <span class="degree-badge">2nd</span></div>
+            <div class="post-author-sub">Principal ML Engineer @ Cortex AI | Speaker | Author</div>
+            <div class="post-meta">
+              <span>5h</span>
+              <span class="post-meta-dot">•</span>
+              <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="post-follow-btn">
+            <svg viewBox="0 0 24 24"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6v-2z"/></svg>
+            Follow
+          </div>
+          <div class="post-more">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="post-body">
+        <div class="post-text">Unpopular opinion: most "AI engineers" are just prompt engineers with better LinkedIn bios.
+
+Real ML engineering is still math-heavy, systems-heavy, and deeply unforgiving. I've interviewed 200+ candidates this year — the gap between those who understand fundamentals and those who've just wrapped GPT-4 is enormous.
+
+<span class="hashtag">#MachineLearning</span> <span class="hashtag">#AIEngineering</span> <span class="hashtag">#TechHiring</span></div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-summary">
+          <div class="reaction-icons">
+            <div class="reaction-icon ri-like">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+            </div>
+            <div class="reaction-icon ri-insightful">
+              <svg viewBox="0 0 24 24" fill="#fff" width="11" height="11"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+            </div>
+          </div>
+          <span>David Okafor and 2,891 others</span>
+        </div>
+        <div class="comment-count">1,103 comments · 488 reposts</div>
+      </div>
+      <div class="post-actions">
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+          Like
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+          Comment
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M3 12l4-4v3h8V7.5l4 4-4 4V13H7v3z"/></svg>
+          Repost
+        </div>
+        <div class="post-action-btn">
+          <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+          Send
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ════════ RIGHT SIDEBAR ════════ -->
+  <aside class="sidebar-right">
+
+    <div class="widget">
+      <div class="widget-title">LinkedIn News</div>
+      <div class="news-item">
+        <div class="news-dot"></div>
+        <div>
+          <div class="news-headline">AI hiring spikes 80% in Q1</div>
+          <div class="news-meta">1d ago · 14,203 readers</div>
+        </div>
+      </div>
+      <div class="news-item">
+        <div class="news-dot"></div>
+        <div>
+          <div class="news-headline">Big Tech layoffs continue into spring</div>
+          <div class="news-meta">3h ago · 9,841 readers</div>
+        </div>
+      </div>
+      <div class="news-item">
+        <div class="news-dot"></div>
+        <div>
+          <div class="news-headline">Remote work: who's winning the debate?</div>
+          <div class="news-meta">6h ago · 7,115 readers</div>
+        </div>
+      </div>
+      <div class="news-item">
+        <div class="news-dot"></div>
+        <div>
+          <div class="news-headline">Series B funding floods AI infra startups</div>
+          <div class="news-meta">12h ago · 5,320 readers</div>
+        </div>
+      </div>
+      <div class="news-item">
+        <div class="news-dot"></div>
+        <div>
+          <div class="news-headline">Why junior dev salaries are rising again</div>
+          <div class="news-meta">2d ago · 18,902 readers</div>
+        </div>
+      </div>
+      <div class="show-more">
+        Show more
+        <svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z"/></svg>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">People you may know</div>
+      <div class="people-item">
+        <div class="people-avatar"><img src="images/person1.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center;" /></div>
+        <div class="people-info">
+          <div class="people-name">Marcus Osei</div>
+          <div class="people-headline">Staff Engineer @ Stripe</div>
+        </div>
+        <div class="connect-btn">Connect</div>
+      </div>
+      <div class="people-item">
+        <div class="people-avatar"><img src="images/person2.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center;" /></div>
+        <div class="people-info">
+          <div class="people-name">Sofia Larsson</div>
+          <div class="people-headline">Product Lead @ Figma</div>
+        </div>
+        <div class="connect-btn">Connect</div>
+      </div>
+      <div class="people-item">
+        <div class="people-avatar"><img src="images/person3.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center;" /></div>
+        <div class="people-info">
+          <div class="people-name">Dev Kapoor</div>
+          <div class="people-headline">Founder @ Helios AI</div>
+        </div>
+        <div class="connect-btn">Connect</div>
+      </div>
+      <div class="show-more">
+        Show all recommendations
+        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Accessibility</a>
+      <a href="#">Help Center</a>
+      <a href="#">Privacy &amp; Terms</a>
+      <a href="#">Ad Choices</a>
+      <a href="#">Advertising</a>
+      <a href="#">Business Services</a>
+      <a href="#">Get the LinkedIn app</a>
+      <a href="#">More</a>
+      <span>LinkedIn Corporation © 2026</span>
+    </div>
+
+  </aside>
+
+</div>
+</body>
+</html>
